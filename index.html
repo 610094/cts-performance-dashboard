@@ -1,0 +1,2567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CTS Performance Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+    font-family:'Segoe UI',sans-serif;
+    margin:20px;
+    background:#f5f7fb;
+}
+
+h1{
+    color:#1e40af;
+}
+
+.filters{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    margin-bottom:25px;
+
+}
+
+select,input{
+    padding:12px 16px;
+    border-radius:12px;
+    border:1px solid #cbd5e1;
+    background:white;
+    min-width:240px;
+    font-size:14px;
+}
+
+.hero-card{
+
+    background:transparent;
+    padding:0;
+    max-width:none;
+    margin:0;
+    box-shadow:none;
+}
+
+.hero-header{
+    margin-bottom:30px;
+}
+
+.hero-title{
+    font-size:32px;
+    font-weight:700;
+    color:#0f172a;
+}
+
+.hero-subtitle{
+    color:#64748b;
+    margin-top:8px;
+}
+
+.hero-content{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    width:100%;
+}
+
+.rating{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+}
+
+.rating-stars{
+    font-size:60px;
+    letter-spacing:6px;
+    line-height:1;
+}
+
+.hero-score{
+    margin-top:12px;
+
+    font-size:42px;
+    font-weight:700;
+
+    color:#0f172a;
+
+    line-height:1;
+}
+
+.filled{
+    color:#f59e0b;
+    text-shadow:
+        0 4px 12px rgba(245,158,11,.4);
+}
+
+.empty{
+    color:#d1d5db;
+}
+
+.half{
+    background:linear-gradient(
+        to right,
+        #f59e0b 50%,
+        #d1d5db 50%
+    );
+
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+#trendChart{
+
+    width:100% !important;
+
+    height:300px !important;
+
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+}
+
+th,td{
+    border:1px solid #ddd;
+    padding:8px;
+}
+
+th{
+    background:#2563eb;
+    color:white;
+}
+
+.table-container{
+    max-height:500px;
+    overflow:auto;
+    background:white;
+    border-radius:12px;
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+}
+#agentScorecard{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:24px;
+
+    width:100%;
+
+    max-width:none;
+
+    margin:0;
+}
+.filters{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    margin-bottom:30px;
+
+}
+
+#agentFilter{
+
+    min-width:400px;
+
+    height:48px;
+
+    text-align:center;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    border-radius:14px;
+
+    box-shadow:
+        0 4px 12px rgba(15,23,42,.08);
+
+}
+.agent-card{
+
+    background:transparent;
+    padding:0;
+    max-width:none;
+    margin:0;
+    box-shadow:none;
+}
+
+.agent-name{
+
+    font-size:18px;
+
+    font-weight:600;
+
+    color:#1e40af;
+
+    text-align:center;
+
+    margin-bottom:10px;
+}
+
+.metrics-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,minmax(170px,1fr));
+
+    gap:18px;
+
+    margin-top:20px;
+}
+
+.metric-box{
+
+    background:#ffffff;
+
+    border-radius:18px;
+
+    min-height:140px;
+
+    padding:16px;
+
+    display:flex;
+    flex-direction:column;
+
+    justify-content:center;
+    align-items:center;
+
+    text-align:center;
+
+    box-shadow:
+        0 4px 15px rgba(15,23,42,.08);
+
+    transition:all .25s ease;
+}
+
+.metric-box:hover{
+
+    transform:translateY(-4px);
+
+    box-shadow:
+        0 12px 30px rgba(15,23,42,.15);
+}
+
+.metric-title{
+
+    font-size:12px;
+
+    font-weight:600;
+
+    color:#64748b;
+
+    width:100%;
+
+    min-height:36px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+
+    line-height:1.2;
+}
+
+.metric-value{
+
+    font-size:32px;
+
+    font-weight:700;
+
+    margin-top:10px;
+
+    text-align:center;
+}
+
+.green{
+    color:#22c55e;
+}
+
+.orange{
+    color:#f97316;
+}
+
+.red{
+    color:#ef4444;
+}
+@media(max-width:1200px){
+
+    .metrics-grid{
+
+        grid-template-columns:
+            repeat(3,1fr);
+
+    }
+
+}
+
+@media(max-width:768px){
+
+    .metrics-grid{
+
+        grid-template-columns:
+            repeat(2,1fr);
+
+    }
+
+}
+@media(max-width:1200px){
+
+    .dashboard-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+}
+.tips-card{
+
+    background:white;
+
+    border-radius:24px;
+
+    padding:20px;
+
+    box-shadow:
+        0 10px 30px rgba(15,23,42,.08);
+
+}
+
+.tips-title{
+
+    font-size:18px;
+
+    font-weight:700;
+
+    color:#0f172a;
+
+    margin-bottom:20px;
+}
+
+.tip-box{
+
+    background:#f8fafc;
+
+    border-left:6px solid #3b82f6;
+
+    padding:16px 20px;
+
+    border-radius:12px;
+
+    margin-bottom:12px;
+}
+
+.tip-header{
+
+    font-weight:700;
+
+    color:#0f172a;
+
+    margin-bottom:6px;
+}
+
+.tip-body{
+
+    color:#64748b;
+
+    line-height:1.5;
+}
+.dashboard-grid{
+    display:grid;
+
+    grid-template-columns: 58% 42%;
+
+    gap:24px;
+
+    max-width:1600px;
+
+    margin:0 auto;
+}
+
+.left-panel{
+
+    background:white;
+
+    border-radius:24px;
+
+    padding:25px;
+
+    box-shadow:
+        0 10px 30px rgba(15,23,42,.08);
+
+    height:fit-content;
+}
+
+
+.right-panel{
+    flex:1;
+}
+
+.right-panel{
+
+    display:flex;
+    flex-direction:column;
+
+    gap:20px;
+}
+.chart-card{
+
+    background:white;
+
+    border-radius:24px;
+
+    padding:25px;
+
+    box-shadow:
+        0 10px 30px rgba(15,23,42,.08);
+
+}
+#loginScreen{
+
+    position:fixed;
+
+    inset:0;
+
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    background:
+        linear-gradient(
+            135deg,
+            #2563eb,
+            #1e40af
+        );
+
+    z-index:9999;
+}
+.logout-btn{
+
+    background:#ef4444;
+
+    color:white;
+
+    border:none;
+
+    padding:10px 16px;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    font-weight:600;
+}
+
+.logout-btn:hover{
+
+    background:#dc2626;
+}
+
+.login-card{
+
+    background:white;
+
+    padding:40px;
+
+    border-radius:24px;
+
+    width:380px;
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,.25);
+
+    text-align:center;
+}
+
+.login-logo{
+
+    font-size:24px;
+
+    font-weight:700;
+
+    color:#1e40af;
+
+    margin-bottom:20px;
+}
+
+.login-card h2{
+
+    margin-bottom:20px;
+}
+
+.login-card input{
+
+    width:100%;
+
+    box-sizing:border-box;
+
+    margin-bottom:15px;
+}
+
+.login-card button{
+
+    width:100%;
+
+    background:#2563eb;
+
+    color:white;
+
+    border:none;
+
+    padding:14px;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    font-size:15px;
+
+    font-weight:600;
+}
+
+.login-card button:hover{
+
+    background:#1d4ed8;
+}
+
+#loginError{
+
+    margin-top:12px;
+
+    color:#ef4444;
+
+    font-size:14px;
+}
+.view-switcher{
+
+    display:flex;
+
+    background:#ffffff;
+
+    border-radius:16px;
+
+    padding:6px;
+
+    width:100%;
+
+    max-width:700px;
+
+    margin:0 auto 20px auto;
+
+    box-shadow:
+        0 4px 15px rgba(15,23,42,.08);
+}
+
+.view-btn{
+
+    flex:1;
+
+    border:none;
+
+    background:transparent;
+
+    padding:14px;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    color:#64748b;
+
+    transition:.25s;
+}
+
+.view-btn.active{
+
+    background:
+        linear-gradient(
+            135deg,
+            #7c3aed,
+            #2563eb
+        );
+
+    color:white;
+
+    box-shadow:
+        0 4px 12px rgba(37,99,235,.25);
+}
+.team-table-card{
+
+    width:100%;
+
+    background:white;
+
+    border-radius:20px;
+
+    padding:20px;
+
+    box-sizing:border-box;
+}
+
+.team-table-container{
+
+    overflow-x:auto;
+    overflow-y:auto;
+
+    max-height:600px;
+}
+
+.team-table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    font-size:13px;
+    min-width: 1800px;
+}
+
+.team-table th{
+
+    background:#2563eb;
+
+    color:white;
+
+    position:sticky;
+
+    top:0;
+
+    z-index:1;
+}
+
+.team-table th,
+.team-table td{
+
+    padding:10px;
+
+    text-align:center;
+
+    border-bottom:
+        1px solid #e2e8f0;
+}
+
+.team-table tr:hover{
+
+    background:#f8fafc;
+}
+</style>
+</head>
+
+<body>
+<div id="loginScreen">
+
+    <div class="login-card">
+
+        <div class="login-logo">
+            CTS Performance Dashboard
+        </div>
+
+        <h2>Sign In</h2>
+
+        <input
+            type="text"
+            id="usernameInput"
+            placeholder="Employee ID"
+        >
+
+        <input
+            type="password"
+            id="passwordInput"
+            placeholder="Password"
+        >
+
+        <button onclick="login()">
+            Access Dashboard
+        </button>
+
+        <div id="loginError"></div>
+
+    </div>
+
+</div>
+
+<div id="dashboardContent" style="display:none;">
+
+<button
+    onclick="logout()"
+    class="logout-btn"
+    style="
+        position:absolute;
+        top:20px;
+        right:20px;
+    ">
+    Logout
+</button>
+
+<div class="dashboard-header">
+
+    <div>
+        <h1>CTS Performance Dashboard</h1>
+
+    </div>
+
+</div>
+<div class="view-switcher">
+
+    <button
+        class="view-btn active"
+        id="agentViewBtn"
+        onclick="switchView('agent')">
+
+        👤 Agent View
+
+    </button>
+
+    <button
+        class="view-btn"
+        id="teamViewBtn"
+        onclick="switchView('team')">
+
+        👥 Team View
+
+    </button>
+
+</div>
+
+
+<div class="filters">
+
+    <select id="agentFilter">
+        <option value="">Select Agent</option>
+    </select>
+
+
+</div>
+<div class="dashboard-grid">
+
+    <div class="left-panel">
+
+        <div id="heroCard"></div>
+
+        <div id="agentScorecard"></div>
+
+    </div>
+
+    <div class="right-panel">
+
+        <div class="chart-card">
+
+            <div style="
+                display:flex;
+                justify-content:center;
+                align-items:center;
+                gap:15px;
+                margin-bottom:20px;
+            ">
+
+                <h3 style="
+                    margin:0;
+                    font-size:22px;
+                ">
+                    Monthly Trend
+                </h3>
+
+                <select id="metricFilter">
+
+                    <option value="Final Score">Final Score</option>
+                    <option value="ACSS">ACSS</option>
+                    <option value="Call: Survey Ratio">Call: Survey Ratio</option>
+                    <option value="Overall Quality">Overall Quality</option>
+                    <option value="Invalid Call">Invalid Call</option>
+                    <option value="Attendance">Attendance</option>
+                    <option value="Adherence">Adherence</option>
+                    <option value="AHT">AHT</option>
+                    <option value="Opened - Case Closure 2 Days">Opened - Case Closure 2 Days</option>
+                    <option value="Opened - Case Closure 15 Days">Opened - Case Closure 15 Days</option>
+                    <option value="Closed - Case Closure 2 Days">Closed - Case Closure 2 Days</option>
+                    <option value="Closed - Case Closure 15 Days">Closed - Case Closure 15 Days</option>
+                    <option value="PKT">PKT</option>
+
+                </select>
+
+            </div>
+
+            <canvas id="trendChart"></canvas>
+
+        </div>
+
+        <div id="personalizedTips"></div>
+
+    </div>
+
+</div>
+
+<script>
+const AGENT_METRICS = [
+    "Final Score",
+    "ACSS",
+    "Call: Survey Ratio",
+    "Overall Quality",
+    "Invalid Call",
+    "Attendance",
+    "Adherence",
+    "AHT",
+    "Opened - Case Closure 2 Days",
+    "Opened - Case Closure 15 Days",
+    "Closed - Case Closure 2 Days",
+    "Closed - Case Closure 15 Days",
+    "PKT"
+];
+
+const TL_METRICS = [
+    "Final Score",
+    "ACSS",
+    "Call: Survey Ratio",
+    "Overall Quality",
+    "Short Call Accuracy",
+    "Individual Attendance",
+    "Team Attendance",
+    "Team Attrition",
+    "Team Adherence",
+    "AHT",
+    "Opened - Case Closure 2 Days",
+    "Closed - Case Closure 2 Days",
+    "Email Approval Compliance",
+    "PKT",
+    "Escalation Case Accuracy",
+    "Escalation Closure Rate"
+];
+const TARGETS = {
+
+    "ACSS": { target: 96.00, higher: true },
+
+    "Survey Ratio": { target: 50.00, higher: true },
+
+    "Overall Quality": { target: 95.20, higher: true },
+
+    "Invalid Call": { target: 0.25, higher: false },
+
+    "Attendance": { target: 100.00, higher: true },
+
+    "Adherence": { target: 99.00, higher: true },
+
+    "Opened - 2 Days": { target: 98.79, higher: true },
+
+    "Opened - 15 Days": { target: 100.00, higher: true },
+
+    "Closed - 2 Days": { target: 98.79, higher: true },
+
+    "Closed - 15 Days": { target: 100.00, higher: true },
+
+    "PKT": { target: 100.00, higher: true }
+
+};
+
+
+let rawData = [];
+let tlData = [];
+let chart;
+let currentView = "agent";
+
+async function sha256(text){
+
+    const encoder =
+        new TextEncoder();
+
+    const data =
+        encoder.encode(text);
+
+    const hashBuffer =
+        await crypto.subtle.digest(
+            "SHA-256",
+            data
+        );
+
+    const hashArray =
+        Array.from(
+            new Uint8Array(hashBuffer)
+        );
+
+    return hashArray
+        .map(
+            byte =>
+                byte
+                .toString(16)
+                .padStart(2,"0")
+        )
+        .join("");
+
+}
+
+async function login(){
+
+    const enteredEID =
+        document.getElementById(
+            "usernameInput"
+        ).value
+        .trim();
+
+    const enteredPassword =
+        document.getElementById(
+            "passwordInput"
+        ).value;
+
+    try{
+
+        const response =
+            await fetch("users.json");
+
+        const users =
+            await response.json();
+
+        const enteredHash =
+            await sha256(
+                enteredPassword
+            );
+
+        const validUser =
+            users.find(user =>
+                String(user.eid).trim()
+                ===
+                enteredEID
+                &&
+                user.hash === enteredHash
+            );
+
+        if(validUser){
+
+            localStorage.setItem(
+                "ctsLoggedIn",
+                "true"
+            );
+
+            localStorage.setItem(
+                "ctsUser",
+                enteredEID
+            );
+
+            document.getElementById(
+                "loginScreen"
+            ).style.display = "none";
+
+            document.getElementById(
+                "dashboardContent"
+            ).style.display = "block";
+
+        }else{
+
+            document.getElementById(
+                "loginError"
+            ).innerText =
+                "Invalid Employee ID or password";
+
+        }
+
+    }catch(error){
+
+        console.error(error);
+
+        document.getElementById(
+            "loginError"
+        ).innerText =
+            "Unable to validate login";
+
+    }
+
+}
+document.addEventListener(
+    "keydown",
+    e => {
+
+        if(
+            e.key === "Enter"
+            &&
+            document.getElementById(
+                "loginScreen"
+            ).style.display !== "none"
+        ){
+
+            login();
+
+        }
+
+    }
+);
+
+window.onload = async function(){
+
+    if(
+    localStorage.getItem(
+        "ctsLoggedIn"
+    ) === "true"
+){
+
+    document.getElementById(
+        "loginScreen"
+    ).style.display = "none";
+
+    document.getElementById(
+        "dashboardContent"
+    ).style.display = "block";
+
+}
+    try{
+
+        const agentResponse =
+            await fetch("agent-data.json");
+
+        rawData =
+            await agentResponse.json();
+
+        const tlResponse =
+            await fetch("tl-data.json");
+
+        tlData =
+            await tlResponse.json();
+
+        populateMetricFilter();
+        populateFilters();
+
+        console.log(
+            "Agents:",
+            rawData.length
+        );
+
+        console.log(
+            "TLs:",
+            tlData.length
+        );
+
+    }
+    catch(error){
+
+        console.error(error);
+
+        alert(error.message);
+
+    }
+
+};
+function logout(){
+
+    localStorage.removeItem(
+        "ctsLoggedIn"
+    );
+
+    localStorage.removeItem(
+        "ctsUser"
+    );
+
+    location.reload();
+
+}
+function switchView(view){
+
+    currentView = view;
+    populateMetricFilter();
+
+    document
+        .getElementById("agentViewBtn")
+        .classList.remove("active");
+
+    document
+        .getElementById("teamViewBtn")
+        .classList.remove("active");
+
+    if(view === "agent"){
+
+        document
+            .getElementById("agentViewBtn")
+            .classList.add("active");
+
+    }else{
+
+        document
+            .getElementById("teamViewBtn")
+            .classList.add("active");
+
+    }
+
+    populateFilters();
+
+    document.getElementById(
+        "agentFilter"
+    ).selectedIndex = 0;
+
+    document.getElementById(
+        "heroCard"
+    ).innerHTML = "";
+
+    document.getElementById(
+        "agentScorecard"
+    ).innerHTML = "";
+
+    document.getElementById(
+        "personalizedTips"
+    ).innerHTML = "";
+}
+
+function populateFilters(){
+
+    const filter =
+        document.getElementById("agentFilter");
+
+    filter.innerHTML =
+    currentView === "agent"
+        ? '<option value="">Select Agent</option>'
+        : '<option value="">Select Team Lead</option>';
+
+    let values = [];
+
+    if(currentView === "agent"){
+
+        values =
+            [...new Set(
+                rawData.map(
+                    x => x.Name
+                )
+            )].sort();
+
+    }else{
+
+        values =
+            [...new Set(
+                rawData.map(
+                    x => x.TL
+                )
+            )].sort();
+
+    }
+
+    values.forEach(value => {
+
+        filter.innerHTML += `
+            <option value="${value}">
+                ${value}
+            </option>
+        `;
+
+    });
+
+}
+
+document.getElementById("agentFilter")
+.addEventListener("change",renderDashboard);
+document
+.getElementById("metricFilter")
+.addEventListener(
+    "change",
+    renderDashboard
+);
+function populateMonthFilter(agentRows){
+
+    const options =
+        [...new Set(
+            agentRows.map(
+                row => `${row.Month} ${row.Year}`
+            )
+        )];
+
+    const currentValue =
+        document.getElementById("monthFilterHero")
+            ?.value || "";
+
+    window.monthOptions =
+        '<option value="">Latest Month</option>';
+
+    options.forEach(option => {
+
+        window.monthOptions += `
+            <option
+                value="${option}"
+                ${currentValue === option ? "selected" : ""}>
+                ${option}
+            </option>
+        `;
+
+    });
+
+}
+
+function renderDashboard(){
+
+    const selectedValue =
+        document.getElementById(
+            "agentFilter"
+        ).value;
+
+    if(!selectedValue) return;
+
+    let agentRows;
+
+    const scorecard =
+        document.getElementById(
+            "agentScorecard"
+        );
+
+    if(currentView === "team"){
+
+        scorecard.style.display = "flex";
+        scorecard.style.flexDirection = "column";
+
+    }else{
+
+        scorecard.style.display = "grid";
+
+        scorecard.style.gridTemplateColumns =
+            "repeat(auto-fit,minmax(220px,1fr))";
+
+    }
+
+    if(currentView === "agent"){
+
+        agentRows =
+            rawData.filter(
+                row =>
+                    row.Name === selectedValue
+            );
+
+    }else{
+
+        agentRows =
+            rawData.filter(
+                row =>
+                    row.TL === selectedValue
+            );
+
+    }
+
+    if(!agentRows.length) return;
+
+    populateMonthFilter(agentRows);
+
+    const monthOrder = {
+        January:1,
+        February:2,
+        March:3,
+        April:4,
+        May:5,
+        June:6,
+        July:7,
+        August:8,
+        September:9,
+        October:10,
+        November:11,
+        December:12
+    };
+
+    const selectedMonth =
+        document.getElementById(
+            "monthFilterHero"
+        )?.value || "";
+
+    let selectedMonthRows;
+
+    if(selectedMonth){
+
+        selectedMonthRows =
+            agentRows.filter(
+                row =>
+                    `${row.Month} ${row.Year}`
+                    ===
+                    selectedMonth
+            );
+
+    }else{
+
+        const latestRow =
+            [...agentRows]
+            .sort(
+                (a,b) =>
+                    monthOrder[b.Month]
+                    -
+                    monthOrder[a.Month]
+            )[0];
+
+        selectedMonthRows =
+            agentRows.filter(
+                row =>
+                    row.Month === latestRow.Month
+                    &&
+                    row.Year === latestRow.Year
+            );
+
+    }
+
+    if(!selectedMonthRows.length)
+        return;
+
+    const selectedMonthLabel =
+    `${selectedMonthRows[0].Month} ${selectedMonthRows[0].Year}`;
+
+    let summaryRow =
+        selectedMonthRows[0];
+
+    let tlRow = null;
+
+    if(currentView === "team"){
+
+        tlRow =
+            getTLMonthlyRow(
+                selectedValue,
+                selectedMonthLabel
+            );
+
+        if(tlRow){
+
+            summaryRow =
+                tlRow;
+
+        }
+
+    }
+
+    renderHeroCard(summaryRow);
+
+    const monthDropdown =
+        document.getElementById(
+            "monthFilterHero"
+        );
+
+    if(monthDropdown){
+
+        monthDropdown.onchange =
+            renderDashboard;
+
+    }
+
+    //
+    // LEFT PANEL
+    //
+
+    if(currentView === "agent"){
+
+        renderScorecard(
+            summaryRow
+        );
+
+    }else{
+
+        document.getElementById(
+            "agentScorecard"
+        ).innerHTML =
+
+            renderTLScorecard(
+                tlRow
+            )
+
+            +
+
+            renderTeamTableHTML(
+                selectedMonthRows
+            );
+
+    }
+
+    //
+    // RIGHT PANEL INSIGHTS
+    //
+
+    if(currentView === "team"){
+
+        const tlTrendRows =
+            tlData.filter(
+                row =>
+                    row.Name === selectedValue
+            );
+
+        renderTeamInsights(
+            selectedMonthRows,
+            tlRow,
+            tlTrendRows
+        );
+
+    }else{
+
+        renderPersonalizedTips(
+            summaryRow
+        );
+
+    }
+
+    //
+    // TREND CHART
+    //
+
+    if(currentView === "team"){
+
+        const tlTrendRows =
+            tlData.filter(
+                row =>
+                    row.Name === selectedValue
+            );
+
+        renderTrendChart(
+            tlTrendRows
+        );
+
+    }else{
+
+        renderTrendChart(
+            agentRows
+        );
+
+    }
+
+}
+function getTLMonthlyRow(selectedTL, selectedMonthLabel){
+
+    if(!tlData.length){
+        return null;
+    }
+
+    return tlData.find(row => {
+
+        const rowMonthLabel =
+            `${row.Month} ${row.Year}`;
+
+        return (
+            rowMonthLabel === selectedMonthLabel
+            &&
+            (
+                row.Name === selectedTL
+                ||
+                row.TL === selectedTL
+            )
+        );
+
+    });
+
+}
+function renderTLScorecard(row){
+
+    if(!row){
+
+        return `
+            <div class="team-table-card">
+
+                <h3>
+                    Team Lead Score
+                </h3>
+
+                <div style="
+                    color:#64748b;
+                    font-size:13px;
+                    padding:10px 0;
+                ">
+                    No TL score found for the selected month.
+                </div>
+
+            </div>
+        `;
+    }
+
+    return `
+
+        <div class="team-table-card">
+
+            <h3>
+                Team Lead Score -
+                ${row.Month || ""}
+                ${row.Year || ""}
+            </h3>
+
+            <div class="team-table-container">
+
+                <table class="team-table">
+
+                    <thead>
+                        <tr>
+                            <th>ACSS</th>
+                            <th>Call: Survey Ratio</th>
+                            <th>Overall Quality</th>
+                            <th>Short Call Accuracy</th>
+                            <th>Individual Attendance</th>
+                            <th>Team Attendance</th>
+                            <th>Team Attrition</th>
+                            <th>Team Adherence</th>
+                            <th>AHT</th>
+                            <th>Opened - Case Closure 2 Days</th>
+                            <th>Closed - Case Closure 2 Days</th>
+                            <th>Email Approval Compliance</th>
+                            <th>PKT</th>
+                            <th>Escalation Case Accuracy</th>
+                            <th>Escalation Closure Rate</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>${formatPct(row["ACSS"])}</td>
+
+                            <td>
+                                ${formatPct(row["Call: Survey Ratio"])}
+                            </td>
+
+                            <td>
+                                ${formatPct(row["Overall Quality"])}
+                            </td>
+
+                            <td>
+                                ${formatPct(row["Short Call Accuracy"])}
+                            </td>
+
+                            <td>
+                                ${formatPct(row["Individual Attendance"])}
+                            </td>
+
+                            <td>
+                                ${formatPct(row["Team Attendance"])}
+                            </td>
+
+                            <td>
+                                ${formatPct(row["Team Attrition"])}
+                            </td>
+
+                            <td>
+                                ${formatPct(row["Team Adherence"])}
+                            </td>
+
+                            <td>
+                                ${formatAHT(row["AHT"])}
+                            </td>
+
+                            <td>
+                                ${formatPct(row["Opened - Case Closure 2 Days"])}
+                            </td>
+
+                            <td>
+                                ${formatPct(row["Closed - Case Closure 2 Days"])}
+                            </td>
+
+                            <td>
+                                ${formatPct(row["Email Approval Compliance"])}
+                            </td>
+
+                            <td>
+                                ${formatPct(row["PKT"])}
+                            </td>
+
+                            <td>
+                                ${formatPct(row["Escalation Case Accuracy"])}
+                            </td>
+
+                            <td>
+                                ${formatPct(row["Escalation Closure Rate"])}
+                            </td>
+                        </tr>
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    `;
+}
+function formatNumber(value, decimals){
+
+    const num =
+        Number(value);
+
+    return isNaN(num)
+        ? "-"
+        : num.toFixed(decimals);
+}
+
+function formatAHT(value){
+
+    const num =
+        Number(value);
+
+    return isNaN(num)
+        ? "-"
+        : Math.round(num) + "s";
+}
+function formatPct(value){
+
+    const num = Number(value);
+
+    return isNaN(num)
+        ? "-"
+        : (num * 100).toFixed(2) + "%";
+
+}
+function getStars(score){
+
+    let stars = "";
+
+    for(let i = 1; i <= 5; i++){
+
+        if(score >= i){
+
+            stars += '<span class="filled">★</span>';
+
+        }
+        else if(score >= (i - 0.5)){
+
+            stars += '<span class="half">★</span>';
+
+        }
+        else{
+
+            stars += '<span class="empty">★</span>';
+
+        }
+
+    }
+
+    return stars;
+
+}
+function renderHeroCard(agent){
+
+    const score =
+        Number(agent["Final Score"]);
+
+    document.getElementById("heroCard")
+    .innerHTML = `
+
+        <div class="hero-card">
+
+            <div class="hero-header">
+
+                <div class="hero-title">
+                    Performance Summary
+                </div>
+
+                <div class="hero-subtitle">
+
+                    <select
+                        id="monthFilterHero"
+                        style="
+                            min-width:180px;
+                            font-size:14px;
+                        "
+                    >
+
+    ${window.monthOptions || ""}
+
+</select>
+
+                </div>
+
+            </div>
+
+            <div class="hero-content">
+
+                <div class="rating">
+
+                    <div class="rating-stars">
+                        ${getStars(score)}
+                    </div>
+
+                    <div class="hero-score">
+                        ${score.toFixed(2)}
+                    </div>
+
+                </div>
+
+</div>
+
+        </div>
+
+    `;
+}
+
+function renderScorecard(agent){
+
+document.getElementById("agentScorecard")
+.innerHTML = `
+
+<div class="agent-card">
+
+<div style="
+    font-size:14px;
+    color:#64748b;
+    margin-bottom:20px;
+    text-align:center;
+">
+    ${agent.Name}
+</div>
+
+<div class="metrics-grid">
+
+    ${metric("ACSS", agent.ACSS)}
+    ${metric("Survey Ratio", agent["Call: Survey Ratio"])}
+    ${metric("Overall Quality", agent["Overall Quality"])}
+    ${metric("Invalid Call", agent["Invalid Call"])}
+    ${metric("Attendance", agent.Attendance)}
+    ${metric("Adherence", agent.Adherence)}
+    ${metricAHT(agent.AHT)}
+    ${metric("Opened - 2 Days", agent["Opened - Case Closure 2 Days"])}
+    ${metric("Opened - 15 Days", agent["Opened - Case Closure 15 Days"])}
+    ${metric("Closed - 2 Days", agent["Closed - Case Closure 2 Days"])}
+    ${metric("Closed - 15 Days", agent["Closed - Case Closure 15 Days"])}
+    ${metric("PKT", agent.PKT)}
+
+</div>
+
+</div>
+
+`;
+
+}
+function renderPersonalizedTips(agent){
+
+    let tips = [];
+
+    // ACSS
+    if(Number(agent.ACSS) * 100 < 96){
+
+        tips.push({
+            title:"😊 Improve CSAT",
+            message:`CSAT is ${(Number(agent.ACSS)*100).toFixed(2)}% against a target of 96.00%. Focus on empathy, active listening, and summarizing next steps before ending the call.`
+        });
+
+    }
+
+    // Survey Ratio
+    if(Number(agent["Call: Survey Ratio"]) * 100 < 50){
+
+        tips.push({
+            title:"📞 Increase Survey Ratio",
+            message:`Survey Ratio is ${(Number(agent["Call: Survey Ratio"])*100).toFixed(2)}%. Consistently educate members about the survey and include a stronger survey invitation in every interaction.`
+        });
+
+    }
+
+    // Quality
+    if(Number(agent["Overall Quality"]) * 100 < 95.2){
+
+        tips.push({
+            title:"✅ Improve Quality",
+            message:`Quality is ${(Number(agent["Overall Quality"])*100).toFixed(2)}%. Review call observations and focus on compliance-sensitive behaviors identified during evaluations.`
+        });
+
+    }
+
+    // Invalid Call
+    if(Number(agent["Invalid Call"]) * 100 > 0.25){
+
+        tips.push({
+            title:"⚠ Reduce Invalid Calls",
+            message:`Invalid Calls are at ${(Number(agent["Invalid Call"])*100).toFixed(2)}%. Ensure to follow daily cadence and strong internet connection.`
+        });
+
+    }
+
+    // Adherence
+    if(Number(agent.Adherence) * 100 < 99){
+
+        tips.push({
+            title:"🕒 Improve Adherence",
+            message:`Adherence is ${(Number(agent.Adherence)*100).toFixed(2)}%. Minimize unplanned AUX time and return promptly from scheduled activities.`
+        });
+
+    }
+
+    // Attendance
+    if(Number(agent.Attendance) * 100 < 100){
+
+        tips.push({
+            title:"📅 Attendance Opportunity",
+            message:`Attendance is ${(Number(agent.Attendance)*100).toFixed(2)}%. Review attendance patterns and proactively report schedule concerns.`
+        });
+
+    }
+
+    // AHT
+    if(Number(agent.AHT) > 600){
+
+        tips.push({
+            title:"⏱ Optimize AHT",
+            message:`AHT is ${Math.round(agent.AHT)}s against a target of ≤600s. Practice call control techniques, use knowledge tools efficiently, and reduce unnecessary hold time.`
+        });
+
+    }
+
+    if(tips.length === 0){
+
+        tips.push({
+            title:"🏆 Excellent Performance",
+            message:"All key KPIs are currently meeting or exceeding target. Continue maintaining current practices and consistency."
+        });
+
+    }
+
+    document.getElementById("personalizedTips").innerHTML = `
+
+        <div class="tips-card">
+
+            <div class="tips-title">
+                💡 Personalized Insights
+            </div>
+
+            ${tips.map(tip => `
+
+                <div class="tip-box">
+
+                    <div class="tip-header">
+                        ${tip.title}
+                    </div>
+
+                    <div class="tip-body">
+                        ${tip.message}
+                    </div>
+
+                </div>
+
+            `).join("")}
+
+        </div>
+
+    `;
+}
+function renderTrendChart(agentRows){
+
+    const metric =
+        document.getElementById("metricFilter")
+        .value;
+
+    const months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December"
+    ];
+
+    agentRows.sort((a,b)=>
+        months.indexOf(a.Month)
+        -
+        months.indexOf(b.Month)
+    );
+
+    const labels =
+        agentRows.map(
+            row => row.Month
+        );
+
+    let values =
+        agentRows.map(
+            row => Number(row[metric])
+        );
+
+    const percentageMetrics = [
+
+        "ACSS",
+        "Call: Survey Ratio",
+        "Overall Quality",
+        "Invalid Call",
+        "Attendance",
+        "Adherence",
+
+        "Short Call Accuracy",
+        "Individual Attendance",
+        "Team Attendance",
+        "Team Attrition",
+        "Team Adherence",
+
+        "Opened - Case Closure 2 Days",
+        "Opened - Case Closure 15 Days",
+        "Closed - Case Closure 2 Days",
+        "Closed - Case Closure 15 Days",
+
+        "Email Approval Compliance",
+
+        "PKT",
+
+        "Escalation Case Accuracy",
+
+        "Escalation Closure Rate"
+    ];
+
+    if(
+        percentageMetrics.includes(metric)
+    ){
+
+        values =
+            values.map(
+                value => value * 100
+            );
+
+    }
+
+    if(chart){
+        chart.destroy();
+    }
+
+    chart = new Chart(
+
+        document.getElementById("trendChart"),
+
+        {
+
+            type:"line",
+
+            data:{
+
+                    labels,
+
+                    datasets:[{
+
+                        label: metric,
+
+                        data: values,
+
+                        borderColor:"#2563eb",
+
+                        backgroundColor:
+                            "rgba(37,99,235,.15)",
+
+                        fill:true,
+
+                        borderWidth:4,
+
+                        tension:.35,
+
+                        pointRadius:6,
+
+                        pointHoverRadius:8,
+
+                        pointBackgroundColor:"#2563eb"
+
+                    }]
+
+                 },
+
+            options:{
+
+                responsive:true,
+
+                plugins:{
+                    legend:{
+                        display:false
+                    }
+                },
+
+                scales:{
+                    y:{
+                        beginAtZero:false
+                    }
+                }
+
+            }
+
+        }
+
+    );
+
+}
+function metric(label,value){
+
+    const actual =
+        Number(value) * 100;
+
+    const config =
+        TARGETS[label];
+
+    let statusClass = "green";
+
+    if(config){
+
+        if(config.higher){
+
+            if(actual >= config.target){
+
+                statusClass = "green";
+
+            }
+            else if(actual >= (config.target - 2)){
+
+                statusClass = "orange";
+
+            }
+            else{
+
+                statusClass = "red";
+            }
+
+        }
+        else{
+
+            if(actual <= config.target){
+
+                statusClass = "green";
+
+            }
+            else if(actual <= (config.target + 2)){
+
+                statusClass = "orange";
+
+            }
+            else{
+
+                statusClass = "red";
+            }
+
+        }
+
+    }
+
+    return `
+    <div class="metric-box ${statusClass}">
+
+        <div class="metric-title">
+            ${label}
+        </div>
+
+        <div class="metric-value ${statusClass}">
+            ${isNaN(actual)
+            ? "-"
+                : actual.toFixed(2) + "%"
+            }
+
+        </div>
+
+        <div class="metric-target">
+            Target:
+            ${config ? config.target.toFixed(2)+"%" : "-"}
+        </div>
+
+    </div>
+    `;
+}
+function metricAHT(value){
+
+    const aht =
+        Number(value);
+
+    let statusClass = "green";
+
+    if(aht <= 600){
+
+        statusClass = "green";
+
+    }
+    else{
+
+        statusClass = "red";
+
+    }
+
+    return `
+    <div class="metric-box ${statusClass}">
+
+        <div class="metric-title">
+            AHT
+        </div>
+
+        <div class="metric-value ${statusClass}">
+            ${Math.round(aht)}s
+        </div>
+
+        <div class="metric-target">
+            Target: ≤ 600s
+        </div>
+
+    </div>
+    `;
+}
+function renderChart(data){
+
+    const grouped = {};
+
+    data.forEach(row=>{
+
+        const name = row.Name;
+
+        const score =
+            Number(row["Final Score"]);
+
+        if(isNaN(score))
+            return;
+
+        if(!grouped[name]){
+
+            grouped[name] = [];
+
+        }
+
+        grouped[name].push(score);
+
+    });
+
+    const labels =
+        Object.keys(grouped);
+
+    const values =
+        labels.map(name=>{
+
+            const scores =
+                grouped[name];
+
+            return (
+                scores.reduce(
+                    (a,b)=>a+b,
+                    0
+                )
+                /
+                scores.length
+            );
+
+        });
+
+    if(chart){
+
+        chart.destroy();
+
+    }
+
+    chart =
+        new Chart(
+            document.getElementById("scoreChart"),
+            {
+                type:"bar",
+
+                data:{
+
+                    labels:
+                        labels.slice(0,20),
+
+                    datasets:[{
+
+                        label:
+                            "Average Final Score",
+
+                        data:
+                            values.slice(0,20),
+
+                        backgroundColor:
+                            "#2563eb"
+
+                    }]
+                }
+            }
+        );
+
+}
+function renderTeamTableHTML(rows){
+
+    return `
+
+        <div class="team-table-card">
+
+            <h3>
+                Team Performance -
+                ${rows[0]?.Month || ""}
+                ${rows[0]?.Year || ""}
+            </h3>
+
+            <div class="team-table-container">
+
+                <table class="team-table">
+
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Final Score</th>
+                        <th>ACSS</th>
+                        <th>Call: Survey Ratio</th>
+                        <th>Overall Quality</th>
+                        <th>Invalid Call</th>
+                        <th>Attendance</th>
+                        <th>Adherence</th>
+                        <th>AHT</th>
+                        <th>Opened - Case Closure 2 Days</th>
+                        <th>Opened - Case Closure 15 Days</th>
+                        <th>Closed - Case Closure 2 Days</th>
+                        <th>Closed - Case Closure 15 Days</th>
+                        <th>PKT</th>
+                    </tr>
+                </thead>
+
+                    <tbody>
+
+                    ${rows.map(row => `
+
+                        <tr>
+
+                            <td>${row.Name || "-"}</td>
+
+                            <td>
+                                ${formatNumber(
+                                    row["Final Score"],
+                                    2
+                                )}
+                            </td>
+
+                            <td>
+                                ${formatPct(row["ACSS"])}
+                            </td>
+
+                            <td>
+                                ${formatPct(
+                                    row["Call: Survey Ratio"]
+                                )}
+                            </td>
+
+                            <td>
+                                ${formatPct(
+                                    row["Overall Quality"]
+                                )}
+                            </td>
+
+                            <td>
+                                ${formatPct(
+                                    row["Invalid Call"]
+                                )}
+                            </td>
+
+                            <td>
+                                ${formatPct(
+                                    row["Attendance"]
+                                )}
+                            </td>
+
+                            <td>
+                                ${formatPct(
+                                    row["Adherence"]
+                                )}
+                            </td>
+
+                            <td>
+                                ${formatAHT(
+                                    row["AHT"]
+                                )}
+                            </td>
+
+                            <td>
+                                ${formatPct(
+                                    row["Opened - Case Closure 2 Days"]
+                                )}
+                            </td>
+
+                            <td>
+                                ${formatPct(
+                                    row["Opened - Case Closure 15 Days"]
+                                )}
+                            </td>
+
+                            <td>
+                                ${formatPct(
+                                    row["Closed - Case Closure 2 Days"]
+                                )}
+                            </td>
+
+                            <td>
+                                ${formatPct(
+                                    row["Closed - Case Closure 15 Days"]
+                                )}
+                            </td>
+
+                            <td>
+                                ${formatPct(
+                                    row["PKT"]
+                                )}
+                            </td>
+
+                        </tr>
+
+                    `).join("")}
+
+                </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    `;
+}
+function populateMetricFilter(){
+
+    const metricFilter =
+        document.getElementById("metricFilter");
+
+    const currentValue =
+        metricFilter.value;
+
+    const metrics =
+        currentView === "team"
+            ? TL_METRICS
+            : AGENT_METRICS;
+
+    metricFilter.innerHTML = "";
+
+    metrics.forEach(metric => {
+
+        metricFilter.innerHTML += `
+            <option value="${metric}">
+                ${metric}
+            </option>
+        `;
+
+    });
+
+    if(metrics.includes(currentValue)){
+
+        metricFilter.value =
+            currentValue;
+
+    }
+
+}
+function renderTeamInsights(teamRows, tlRow, trendRows){
+
+    const highestFinal =
+        [...teamRows]
+        .filter(row => !isNaN(Number(row["Final Score"])))
+        .sort(
+            (a,b) =>
+                Number(b["Final Score"])
+                -
+                Number(a["Final Score"])
+        )[0];
+
+    const highestACSS =
+        [...teamRows]
+        .filter(row => !isNaN(Number(row["ACSS"])))
+        .sort(
+            (a,b) =>
+                Number(b["ACSS"])
+                -
+                Number(a["ACSS"])
+        )[0];
+
+    const bestAHT =
+        [...teamRows]
+        .filter(
+            row => !isNaN(Number(row["AHT"]))
+        )
+        .sort(
+            (a,b) =>
+                Number(a["AHT"])
+                -
+                Number(b["AHT"])
+        )[0];
+
+    const bestAttendance =
+        [...teamRows]
+        .filter(row => !isNaN(Number(row["Attendance"])))
+        .sort(
+            (a,b) =>
+                Number(b["Attendance"])
+                -
+                Number(a["Attendance"])
+        )[0];
+
+    const belowTargetACSS =
+        teamRows.filter(
+            row =>
+                Number(row["ACSS"]) * 100 < 96
+        ).length;
+
+    let strengthMessage =
+        "TL score data is not available for the selected month.";
+
+        if(tlRow){
+
+            strengthMessage =
+                `Overall Quality is ${
+                    formatPct(
+                        tlRow["Overall Quality"]
+                    )
+                }, compared with the 95.20% target.`;
+
+        }
+
+    let trendMessage =
+        "Trend data unavailable.";
+
+    const monthOrder = {
+        January:1,
+        February:2,
+        March:3,
+        April:4,
+        May:5,
+        June:6,
+        July:7,
+        August:8,
+        September:9,
+        October:10,
+        November:11,
+        December:12
+    };
+
+    const sortedTrendRows =
+        [...trendRows]
+        .filter(row => !isNaN(Number(row["Final Score"])))
+        .sort(
+            (a,b) =>
+                monthOrder[a.Month]
+                -
+                monthOrder[b.Month]
+        );
+
+    if(sortedTrendRows.length >= 2){
+
+        const first =
+            Number(
+                sortedTrendRows[0]["Final Score"]
+            );
+
+        const last =
+            Number(
+                sortedTrendRows[
+                    sortedTrendRows.length - 1
+                ]["Final Score"]
+            );
+
+        if(last > first){
+
+            trendMessage =
+                `Final Score improved from ${first.toFixed(2)} to ${last.toFixed(2)} this year.`;
+
+        }else if(last < first){
+
+            trendMessage =
+                `Final Score decreased from ${first.toFixed(2)} to ${last.toFixed(2)} this year.`;
+
+        }else{
+
+            trendMessage =
+                `Final Score remained stable at ${last.toFixed(2)} this year.`;
+
+        }
+
+    }
+
+    document.getElementById(
+        "personalizedTips"
+    ).innerHTML = `
+
+        <div class="tips-card">
+
+            <div class="tips-title">
+                📊 Team Insights
+            </div>
+
+            <div class="tip-box">
+
+                <div class="tip-header">
+                    🏆 Team Strength
+                </div>
+
+                <div class="tip-body">
+                    ${strengthMessage}
+                </div>
+
+            </div>
+
+            <div class="tip-box">
+
+                <div class="tip-header">
+                    📈 Positive Trend
+                </div>
+
+                <div class="tip-body">
+                    ${trendMessage}
+                </div>
+
+            </div>
+
+            <div class="tip-box">
+
+                <div class="tip-header">
+                    ⚠ Coaching Opportunity
+                </div>
+
+                <div class="tip-body">
+                    ${belowTargetACSS} agent/s are currently below the ACSS target of 96%.
+                </div>
+
+            </div>
+
+            <div class="tip-box">
+
+                <div class="tip-header">
+                    🏅 Top Performers
+                </div>
+
+                <div class="tip-body">
+
+                    🥇 Highest Final Score:
+                    <b>${highestFinal ? highestFinal.Name : "-"}</b>
+                    ${
+                        highestFinal
+                        ? "(" + formatNumber(highestFinal["Final Score"], 2) + ")"
+                        : ""
+                    }
+
+                    <br><br>
+
+                    😊 Highest ACSS:
+                    <b>${highestACSS ? highestACSS.Name : "-"}</b>
+                    ${
+                        highestACSS
+                        ? "(" + formatPct(highestACSS["ACSS"]) + ")"
+                        : ""
+                    }
+
+                    <br><br>
+
+                    ⏱ Best AHT:
+                    <b>${bestAHT ? bestAHT.Name : "-"}</b>
+                    ${
+                        bestAHT
+                        ? "(" + formatAHT(bestAHT["AHT"]) + ")"
+                        : ""
+                    }
+
+                    <br><br>
+
+                    🎯 Best Attendance:
+                    <b>${bestAttendance ? bestAttendance.Name : "-"}</b>
+                    ${
+                        bestAttendance
+                        ? "(" + formatPct(bestAttendance["Attendance"]) + ")"
+                        : ""
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+}    
+</script>
+</div>
+</body>
+</html>
