@@ -882,6 +882,10 @@ let tlData = [];
 let chart;
 let currentView = "agent";
 
+let currentUser = null;
+let currentUserRole = "";
+let currentUserName = "";
+
 async function sha256(text){
 
     const encoder =
@@ -915,15 +919,13 @@ async function sha256(text){
 async function login(){
 
     const enteredEID =
-        document.getElementById(
-            "usernameInput"
-        ).value
+        document.getElementById("usernameInput")
+        .value
         .trim();
 
     const enteredPassword =
-        document.getElementById(
-            "passwordInput"
-        ).value;
+        document.getElementById("passwordInput")
+        .value;
 
     try{
 
@@ -934,20 +936,27 @@ async function login(){
             await response.json();
 
         const enteredHash =
-            await sha256(
-                enteredPassword
-            );
+            await sha256(enteredPassword);
 
         const validUser =
             users.find(user =>
-                String(user.eid).trim()
-                ===
-                enteredEID
+                String(user.eid).trim() === enteredEID
                 &&
-                user.hash === enteredHash
+                String(user.hash).trim() === enteredHash
             );
 
         if(validUser){
+
+            currentUser = validUser;
+
+            currentUserRole =
+                String(validUser.role || "")
+                .trim()
+                .toLowerCase();
+
+            currentUserName =
+                String(validUser.name || "")
+                .trim();
 
             localStorage.setItem(
                 "ctsLoggedIn",
@@ -956,22 +965,23 @@ async function login(){
 
             localStorage.setItem(
                 "ctsUser",
-                enteredEID
+                JSON.stringify(validUser)
             );
 
-            document.getElementById(
-                "loginScreen"
-            ).style.display = "none";
+            document.getElementById("loginScreen")
+                .style.display = "none";
 
-            document.getElementById(
-                "dashboardContent"
-            ).style.display = "block";
+            document.getElementById("dashboardContent")
+                .style.display = "block";
+
+            applyRoleAccess();
+            populateMetricFilter();
+            populateFilters();
 
         }else{
 
-            document.getElementById(
-                "loginError"
-            ).innerText =
+            document.getElementById("loginError")
+                .innerText =
                 "Invalid Employee ID or password";
 
         }
@@ -980,9 +990,8 @@ async function login(){
 
         console.error(error);
 
-        document.getElementById(
-            "loginError"
-        ).innerText =
+        document.getElementById("loginError")
+            .innerText =
             "Unable to validate login";
 
     }
@@ -1009,21 +1018,6 @@ document.addEventListener(
 
 window.onload = async function(){
 
-    if(
-    localStorage.getItem(
-        "ctsLoggedIn"
-    ) === "true"
-){
-
-    document.getElementById(
-        "loginScreen"
-    ).style.display = "none";
-
-    document.getElementById(
-        "dashboardContent"
-    ).style.display = "block";
-
-}
     try{
 
         const agentResponse =
@@ -1038,24 +1032,52 @@ window.onload = async function(){
         tlData =
             await tlResponse.json();
 
-        populateMetricFilter();
-        populateFilters();
+        if(
+            localStorage.getItem("ctsLoggedIn") === "true"
+            &&
+            localStorage.getItem("ctsUser")
+        ){
 
-        console.log(
-            "Agents:",
-            rawData.length
-        );
+            currentUser =
+                JSON.parse(
+                    localStorage.getItem("ctsUser")
+                );
 
-        console.log(
-            "TLs:",
-            tlData.length
-        );
+            currentUserRole =
+                String(currentUser.role || "")
+                .trim()
+                .toLowerCase();
 
-    }
-    catch(error){
+            currentUserName =
+                String(currentUser.name || "")
+                .trim();
+
+            document.getElementById("loginScreen")
+                .style.display = "none";
+
+            document.getElementById("dashboardContent")
+                .style.display = "block";
+
+            applyRoleAccess();
+            populateMetricFilter();
+            populateFilters();
+
+        }else{
+
+            document.getElementById("loginScreen")
+                .style.display = "flex";
+
+            document.getElementById("dashboardContent")
+                .style.display = "none";
+
+        }
+
+        console.log("Agents:", rawData.length);
+        console.log("TLs:", tlData.length);
+
+    }catch(error){
 
         console.error(error);
-
         alert(error.message);
 
     }
@@ -1063,21 +1085,118 @@ window.onload = async function(){
 };
 function logout(){
 
-    localStorage.removeItem(
-        "ctsLoggedIn"
-    );
+    localStorage.removeItem("ctsLoggedIn");
+    localStorage.removeItem("ctsUser");
 
-    localStorage.removeItem(
-        "ctsUser"
-    );
+    currentUser = null;
+    currentUserRole = "";
+    currentUserName = "";
 
     location.reload();
 
 }
+function applyRoleAccess(){
+
+    const teamBtn =
+        document.getElementById("teamViewBtn");
+
+    const agentBtn =
+        document.getElementById("agentViewBtn");
+
+    const agentDropdown =
+        document.getElementById("agentFilter");
+
+    if(currentUserRole === "agent"){
+
+        currentView = "agent";
+
+        teamBtn.style.display =
+            "none";
+
+        agentBtn.classList.add("active");
+        teamBtn.classList.remove("active");
+
+        agentDropdown.disabled =
+            false;
+
+    }else if(currentUserRole === "tl"){
+
+        teamBtn.style.display =
+            "block";
+
+        agentDropdown.disabled =
+            false;
+
+    }
+
+}
+function populateFilters(){
+
+    const filter =
+        document.getElementById("agentFilter");
+
+    filter.innerHTML =
+        currentView === "agent"
+        ? '<option value="">Select Agent</option>'
+        : '<option value="">Select Team Lead</option>';
+
+    let values = [];
+
+    if(!currentUser){
+        return;
+    }
+
+    if(currentView === "agent"){
+
+        values =
+            [...new Set(
+                rawData
+                .map(row =>
+                    String(row.Name || "").trim()
+                )
+                .filter(name => name !== "")
+            )].sort();
+
+    }else if(currentView === "team"){
+
+        if(currentUserRole !== "tl"){
+            return;
+        }
+
+        values =
+            [...new Set(
+                rawData
+                .map(row =>
+                    String(row.TL || "").trim()
+                )
+                .filter(name => name !== "")
+            )].sort();
+
+    }
+
+    values.forEach(value => {
+
+        filter.innerHTML += `
+            <option value="${value}">
+                ${value}
+            </option>
+        `;
+
+    });
+
+}
+
 function switchView(view){
 
+    if(
+        currentUserRole === "agent"
+        &&
+        view === "team"
+    ){
+        return;
+    }
+
     currentView = view;
-    populateMetricFilter();
 
     document
         .getElementById("agentViewBtn")
@@ -1101,66 +1220,8 @@ function switchView(view){
 
     }
 
+    populateMetricFilter();
     populateFilters();
-
-    document.getElementById(
-        "agentFilter"
-    ).selectedIndex = 0;
-
-    document.getElementById(
-        "heroCard"
-    ).innerHTML = "";
-
-    document.getElementById(
-        "agentScorecard"
-    ).innerHTML = "";
-
-    document.getElementById(
-        "personalizedTips"
-    ).innerHTML = "";
-}
-
-function populateFilters(){
-
-    const filter =
-        document.getElementById("agentFilter");
-
-    filter.innerHTML =
-    currentView === "agent"
-        ? '<option value="">Select Agent</option>'
-        : '<option value="">Select Team Lead</option>';
-
-    let values = [];
-
-    if(currentView === "agent"){
-
-        values =
-            [...new Set(
-                rawData.map(
-                    x => x.Name
-                )
-            )].sort();
-
-    }else{
-
-        values =
-            [...new Set(
-                rawData.map(
-                    x => x.TL
-                )
-            )].sort();
-
-    }
-
-    values.forEach(value => {
-
-        filter.innerHTML += `
-            <option value="${value}">
-                ${value}
-            </option>
-        `;
-
-    });
 
 }
 
@@ -1205,18 +1266,17 @@ function populateMonthFilter(agentRows){
 function renderDashboard(){
 
     const selectedValue =
-        document.getElementById(
-            "agentFilter"
-        ).value;
+        document.getElementById("agentFilter")
+        .value;
 
-    if(!selectedValue) return;
+    if(!selectedValue){
+        return;
+    }
 
-    let agentRows;
+    let agentRows = [];
 
     const scorecard =
-        document.getElementById(
-            "agentScorecard"
-        );
+        document.getElementById("agentScorecard");
 
     if(currentView === "team"){
 
@@ -1235,22 +1295,31 @@ function renderDashboard(){
     if(currentView === "agent"){
 
         agentRows =
-            rawData.filter(
-                row =>
-                    row.Name === selectedValue
+            rawData.filter(row =>
+                String(row.Name || "").trim()
+                ===
+                selectedValue
             );
 
-    }else{
+    }else if(currentView === "team"){
+
+        if(currentUserRole !== "tl"){
+            return;
+        }
 
         agentRows =
-            rawData.filter(
-                row =>
-                    row.TL === selectedValue
+            rawData.filter(row =>
+                String(row.TL || "").trim()
+                ===
+                selectedValue
             );
 
     }
 
-    if(!agentRows.length) return;
+    if(!agentRows.length){
+        return;
+    }
+    
 
     populateMonthFilter(agentRows);
 
@@ -1321,10 +1390,10 @@ function renderDashboard(){
     if(currentView === "team"){
 
         tlRow =
-            getTLMonthlyRow(
-                selectedValue,
-                selectedMonthLabel
-            );
+        getTLMonthlyRow(
+        selectedValue,
+        selectedMonthLabel
+    );
 
         if(tlRow){
 
@@ -1384,10 +1453,12 @@ function renderDashboard(){
     if(currentView === "team"){
 
         const tlTrendRows =
-            tlData.filter(
-                row =>
-                    row.Name === selectedValue
-            );
+    tlData.filter(
+        row =>
+            String(row.Name || "").trim()
+            ===
+            selectedValue
+    );
 
         renderTeamInsights(
             selectedMonthRows,
@@ -1410,10 +1481,12 @@ function renderDashboard(){
     if(currentView === "team"){
 
         const tlTrendRows =
-            tlData.filter(
-                row =>
-                    row.Name === selectedValue
-            );
+    tlData.filter(
+        row =>
+            String(row.Name || "").trim()
+            ===
+            selectedValue
+    );
 
         renderTrendChart(
             tlTrendRows
