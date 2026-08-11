@@ -1174,15 +1174,23 @@ function populateFilters(){
 
     }
 
-    values.forEach(value => {
+values.forEach(value => {
 
-        filter.innerHTML += `
-            <option value="${value}">
-                ${value}
-            </option>
-        `;
+    filter.innerHTML += `
+        <option value="${value}">
+            ${value}
+        </option>
+    `;
 
-    });
+});
+
+if(values.length){
+
+    filter.value = values[0];
+
+    renderDashboard();
+
+}
 
 }
 
