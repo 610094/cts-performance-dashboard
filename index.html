@@ -1206,6 +1206,19 @@ function switchView(view){
 
     currentView = view;
 
+    // CLEAR PREVIOUS VIEW CONTENT
+    document.getElementById(
+        "heroCard"
+    ).innerHTML = "";
+
+    document.getElementById(
+        "agentScorecard"
+    ).innerHTML = "";
+
+    document.getElementById(
+        "personalizedTips"
+    ).innerHTML = "";
+
     document
         .getElementById("agentViewBtn")
         .classList.remove("active");
@@ -1225,6 +1238,13 @@ function switchView(view){
         document
             .getElementById("teamViewBtn")
             .classList.add("active");
+
+    }
+
+    if(chart){
+
+        chart.destroy();
+        chart = null;
 
     }
 
@@ -1439,18 +1459,18 @@ function renderDashboard(){
     }else{
 
         document.getElementById(
-            "agentScorecard"
-        ).innerHTML =
+    "agentScorecard"
+).innerHTML =
 
-            renderTLScorecard(
-                tlRow
-            )
+    (tlRow
+        ? renderTLScorecard(tlRow)
+        : "")
 
-            +
+    +
 
-            renderTeamTableHTML(
-                selectedMonthRows
-            );
+    renderTeamTableHTML(
+        selectedMonthRows
+    );
 
     }
 
@@ -1468,11 +1488,21 @@ function renderDashboard(){
             selectedValue
     );
 
-        renderTeamInsights(
-            selectedMonthRows,
-            tlRow,
-            tlTrendRows
-        );
+        if(tlRow){
+
+    renderTeamInsights(
+        selectedMonthRows,
+        tlRow,
+        tlTrendRows
+    );
+
+}else{
+
+    document.getElementById(
+        "personalizedTips"
+    ).innerHTML = "";
+
+}
 
     }else{
 
